@@ -1,0 +1,104 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+model User {
+  id               String    @id @default(cuid())
+  name             String?
+  username         String    @unique
+  email            String    @unique
+  passwordHash     String
+  image            String?
+  reputation       Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  posts            Post[]
+  comments         Comment[]
+  
+  // Relations for persistent direct messaging
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  gameStats        Json?
+}
+
+model Post {
+  id        String    @id @default(cuid())
+  title     String
+  content   String    
+  tags      String[]  
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  upvotes   Int       @default(0)
+
+  comments  Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  content     String
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User     @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([senderId, recipientId])
+}
+
+// prisma/schema.prisma
+// ... (leave User, Post, Comment, and Message models exactly as they are)
+
+model Challenge {
+  id          String   @id @default(cuid())
+  title       String
+  difficulty  String   // e.g., "Easy", "Medium", "Hard"
+  description String
+  templates   Json     // Stored as JSON: { javascript: "...", python: "..." }
+  testCases   Json     // Stored as JSON: [{ input: [5, 7], expected: 12 }]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// prisma/schema.prisma
+// ... (leave User, Post, Comment, Message, and Challenge models exactly as they are)
+
+model Quiz {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  domain      String         // e.g., "mathematics", "algorithms", "music", "science"
+  questions   QuizQuestion[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model QuizQuestion {
+  id        String   @id @default(cuid())
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text      String
+  options   String[] // Array of choice options (e.g. ["A", "B", "C", "D"])
+  answer    String   // The string value matching the correct option
+  createdAt DateTime @default(now())
+}
