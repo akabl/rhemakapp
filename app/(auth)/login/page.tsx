@@ -85,7 +85,12 @@ export default function LoginPage() {
               disabled={isPending}
             />
           </div>
-
+           {/* Add this link below your password input and above the submit button */}
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-xs text-blue-400 hover:underline">
+              Forgot Password?
+            </Link>
+          </div>
           <button
             type="submit"
             disabled={isPending}
@@ -100,6 +105,7 @@ export default function LoginPage() {
           <Link href="/register" className="text-blue-400 hover:underline">
             Sign Up
           </Link>
+          
         </p>
       </div>
     </main>

@@ -76,3 +76,8 @@ export type Quiz = Prisma.QuizModel
  * 
  */
 export type QuizQuestion = Prisma.QuizQuestionModel
+/**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel

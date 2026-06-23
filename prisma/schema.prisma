@@ -102,3 +102,14 @@ model QuizQuestion {
   answer    String   // The string value matching the correct option
   createdAt DateTime @default(now())
 }
+
+// prisma/schema.prisma
+// ... (leave all other models exactly as they are)
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
