@@ -1,4 +1,4 @@
-// hooks/useSocket.tsx
+// app/hooks/useSocket.tsx
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -21,8 +21,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Replace with your microservice/WebSocket server URL
-    const socketInstance = io(process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001', {
+    // If NEXT_PUBLIC_WS_URL is missing, default to the current active website domain
+    const activeUrl = 
+      process.env.NEXT_PUBLIC_WS_URL || 
+      (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+
+    const socketInstance = io(activeUrl, {
       autoConnect: false,
     });
 
