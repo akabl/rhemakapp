@@ -164,7 +164,6 @@ export default function ChessArenaPage() {
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 flex flex-col items-center">
           <div className="w-full max-w-[500px] aspect-square rounded-lg overflow-hidden shadow-2xl border border-slate-800">
             <Chessboard 
-              id="RhemakaBoard" // Explicit ID facilitates rendering cache
               position={game.fen() as any} // Direct live FEN evaluation
               onPieceDrop={onDrop as any} 
               boardOrientation={playerColor === 'spectator' ? 'white' : playerColor} // Orient board based on assigned role
