@@ -1,12 +1,13 @@
 // app/(auth)/reset-password/page.tsx
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { resetPasswordWithToken } from '@/app/actions/password';
 import Link from 'next/link';
 
-export default function ResetPasswordPage() {
+// 1. Move search parameter and form logic into a sub-component
+function ResetPasswordContent() {
   const [newPass, setNewPass] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
   const [error, setError] = useState('');
@@ -16,7 +17,7 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Extract token from routing query parameters on page load
+  // Extract token parameter safely on load
   useEffect(() => {
     const queryToken = searchParams.get('token');
     if (queryToken) {
@@ -44,70 +45,81 @@ export default function ResetPasswordPage() {
       } else {
         setSuccess('✓ Your password has been successfully reset!');
         setTimeout(() => {
-          router.push('/login'); // Redirect to login page after 2 seconds
+          router.push('/login');
         }, 2000);
       }
     });
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-slate-100">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Set New Password</h1>
-          <p className="text-sm text-slate-400 mt-1">Please enter your new security credentials below.</p>
-        </div>
-
-        {success && (
-          <div className="p-3 bg-green-950/50 border border-green-800 rounded-lg text-xs text-green-300">
-            {success} Redirecting to login...
-          </div>
-        )}
-
-        {error && (
-          <div className="p-3 bg-red-950/50 border border-red-800 rounded-lg text-xs text-red-300">
-            ⚠ {error}
-          </div>
-        )}
-
-        {!success && token && (
-          <form onSubmit={handleReset} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-1.5">New Password</label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={newPass}
-                onChange={(e) => setNewPass(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 transition text-slate-100"
-                disabled={isPending}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-1.5">Confirm New Password</label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={confirmPass}
-                onChange={(e) => setConfirmPass(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 transition text-slate-100"
-                disabled={isPending}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isPending}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 text-white font-semibold text-sm rounded-lg transition mt-2 shadow-md cursor-pointer"
-            >
-              {isPending ? 'Resetting Password...' : 'Reset Password'}
-            </button>
-          </form>
-        )}
+    <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 space-y-6">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold tracking-tight">Set New Password</h1>
+        <p className="text-sm text-slate-400 mt-1">Please enter your new security credentials below.</p>
       </div>
+
+      {success && (
+        <div className="p-3 bg-green-950/50 border border-green-800 rounded-lg text-xs text-green-300">
+          {success} Redirecting to login...
+        </div>
+      )}
+
+      {error && (
+        <div className="p-3 bg-red-950/50 border border-red-800 rounded-lg text-xs text-red-300">
+          ⚠ {error}
+        </div>
+      )}
+
+      {!success && token && (
+        <form onSubmit={handleReset} className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-1.5">New Password</label>
+            <input
+              type="password"
+              required
+              placeholder="••••••••"
+              value={newPass}
+              onChange={(e) => setNewPass(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 transition text-slate-100"
+              disabled={isPending}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-1.5">Confirm New Password</label>
+            <input
+              type="password"
+              required
+              placeholder="••••••••"
+              value={confirmPass}
+              onChange={(e) => setConfirmPass(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 transition text-slate-100"
+              disabled={isPending}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 text-white font-semibold text-sm rounded-lg transition mt-2 shadow-md cursor-pointer"
+          >
+            {isPending ? 'Resetting Password...' : 'Reset Password'}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+// 2. Export page wrapper with React Suspense boundary
+export default function ResetPasswordPage() {
+  return (
+    <main className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-slate-100">
+      <Suspense fallback={
+        <div className="text-xs text-slate-500">Verifying secure keys...</div>
+      }>
+        <ResetPasswordContent />
+      </Suspense>
     </main>
   );
 }
