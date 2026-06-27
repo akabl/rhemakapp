@@ -2,18 +2,16 @@
 'use client';
 
 import { useState, useTransition, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { loginUser } from '@/app/actions/auth';
 import Link from 'next/link';
 
-// 1. Move the elements utilizing useSearchParams into a sub-component
 function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Show a message if redirected from a successful registration
@@ -31,11 +29,10 @@ function LoginContent() {
     startTransition(async () => {
       const result = await loginUser(email, password);
 
+      // On success, Next.js will automatically redirect them server-side,
+      // so we only need to monitor if an error object is returned.
       if (result?.error) {
         setError(result.error);
-      } else {
-        router.push('/forum'); // Redirect to dashboard
-        router.refresh(); // Refresh route data to load session state
       }
     });
   };
@@ -111,12 +108,11 @@ function LoginContent() {
   );
 }
 
-// 2. Export page wrapper with React Suspense boundary
 export default function LoginPage() {
   return (
     <main className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-slate-100">
       <Suspense fallback={
-        <div className="text-xs text-slate-500">Loading account portal...</div>
+        <div className="text-xs text-slate-500">Loading auth configurations...</div>
       }>
         <LoginContent />
       </Suspense>

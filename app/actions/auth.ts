@@ -13,7 +13,6 @@ export async function registerUser(username: string, email: string, password: st
   }
 
   try {
-    // Check if username or email already exists
     const existingUser = await db.user.findFirst({
       where: {
         OR: [
@@ -27,16 +26,14 @@ export async function registerUser(username: string, email: string, password: st
       return { error: "Username or email is already taken." };
     }
 
-    // Hash the password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create the user in Supabase
     await db.user.create({
       data: {
         username: username.trim(),
         email: email.trim().toLowerCase(),
         passwordHash,
-        reputation: 10, // Starting reputation
+        reputation: 10,
       }
     });
 
@@ -47,16 +44,16 @@ export async function registerUser(username: string, email: string, password: st
   }
 }
 
-// Action 2: Trigger NextAuth Credentials Sign-In
+// Action 2: Trigger NextAuth Credentials Sign-In (Using native Server-Side Redirects)
 export async function loginUser(email: string, password: string) {
   try {
     await signIn("credentials", {
       email,
       password,
-      redirect: false, // Prevents automatic default redirects so we can handle it in our client component
+      redirectTo: "/forum", // Next.js will handle cookie setting and redirect safely on the server!
     });
-    return { success: true };
   } catch (error) {
+    // NextAuth throws AuthError if credentials mismatch
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
@@ -65,6 +62,9 @@ export async function loginUser(email: string, password: string) {
           return { error: "Something went wrong during login." };
       }
     }
+    
+    // IMPORTANT: In NextAuth v5, successful login internally throws a Redirect error.
+    // We MUST re-throw the error so that Next.js can intercept it and perform the redirect!
     throw error;
   }
 }
