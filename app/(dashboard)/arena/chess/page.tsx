@@ -150,6 +150,19 @@ export default function ChessArenaPage() {
     }
   };
 
+  // Group all configuration properties into a single v5 Options API object
+  const chessboardOptions = {
+    position: game.fen(),
+    onPieceDrop: onDrop,
+    boardOrientation: playerColor === 'spectator' ? 'white' : playerColor,
+    boardStyle: {
+      borderRadius: '8px',
+      boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.5)',
+    },
+    darkSquareStyle: { backgroundColor: '#1e293b' }, // tailwind slate-800
+    lightSquareStyle: { backgroundColor: '#cbd5e1' }, // tailwind slate-300
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <Link 
@@ -163,17 +176,8 @@ export default function ChessArenaPage() {
         {/* Left Column: Board Canvas Layout */}
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 flex flex-col items-center">
           <div className="w-full max-w-[500px] aspect-square rounded-lg overflow-hidden shadow-2xl border border-slate-800">
-            <Chessboard 
-              position={game.fen() as any} // Direct live FEN evaluation
-              onPieceDrop={onDrop as any} 
-              boardOrientation={playerColor === 'spectator' ? 'white' : playerColor} // Orient board based on assigned role
-              customBoardStyle={{
-                borderRadius: '8px',
-                boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.5)',
-              }}
-              customDarkSquareStyle={{ backgroundColor: '#1e293b' }} // tailwind slate-800
-              customLightSquareStyle={{ backgroundColor: '#cbd5e1' }} // tailwind slate-300
-            />
+            {/* Pass configuration solely through the options prop per the v5 API */}
+            <Chessboard options={chessboardOptions as any} />
           </div>
         </div>
 
