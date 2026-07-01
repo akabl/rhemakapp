@@ -63,11 +63,13 @@ model Message {
   recipient   User     @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
 
+  // Self-relation fields to support quoted replies
+  replyToId   String?
+  replyTo     Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     Message[] @relation("MessageReplies")
+
   @@index([senderId, recipientId])
 }
-
-// prisma/schema.prisma
-// ... (leave User, Post, Comment, and Message models exactly as they are)
 
 model Challenge {
   id          String   @id @default(cuid())
@@ -79,9 +81,6 @@ model Challenge {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
-
-// prisma/schema.prisma
-// ... (leave User, Post, Comment, Message, and Challenge models exactly as they are)
 
 model Quiz {
   id          String         @id @default(cuid())
@@ -97,14 +96,11 @@ model QuizQuestion {
   id        String   @id @default(cuid())
   quizId    String
   quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  text      String
+  text      String   // Question text
   options   String[] // Array of choice options (e.g. ["A", "B", "C", "D"])
   answer    String   // The string value matching the correct option
   createdAt DateTime @default(now())
 }
-
-// prisma/schema.prisma
-// ... (leave all other models exactly as they are)
 
 model PasswordResetToken {
   id        String   @id @default(cuid())

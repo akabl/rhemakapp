@@ -4,11 +4,13 @@
 import { useState, useTransition, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { loginUser } from '@/app/actions/auth';
+import { Eye, EyeOff } from 'lucide-react'; // Import Lucide icons
 import Link from 'next/link';
 
 function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // Track visibility state
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -29,8 +31,6 @@ function LoginContent() {
     startTransition(async () => {
       const result = await loginUser(email, password);
 
-      // On success, Next.js will automatically redirect them server-side,
-      // so we only need to monitor if an error object is returned.
       if (result?.error) {
         setError(result.error);
       }
@@ -72,15 +72,26 @@ function LoginContent() {
 
         <div>
           <label className="block text-sm font-semibold text-slate-300 mb-1.5">Password</label>
-          <input
-            type="password"
-            required
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 transition text-slate-100"
-            disabled={isPending}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"} // Dynamically toggle input type
+              required
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 pr-10 text-sm focus:outline-none focus:border-blue-500 transition text-slate-100"
+              disabled={isPending}
+            />
+            {/* Absolute-positioned eye icon toggle button */}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
+              disabled={isPending}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </div>
 
         <div className="flex justify-end">

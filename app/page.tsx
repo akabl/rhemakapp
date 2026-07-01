@@ -1,5 +1,6 @@
 // app/page.tsx
 import Link from 'next/link';
+import Image from 'next/image'; // Import the Next.js optimized Image component
 import { auth } from '@/auth';
 
 export default async function Home() {
@@ -9,12 +10,21 @@ export default async function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-slate-950 text-white">
-      <div className="text-center max-w-xl">
-        <h1 className="text-5xl font-extrabold tracking-tight mb-4 select-none">
-          Rhemaka
-        </h1>
+      <div className="text-center max-w-xl flex flex-col items-center">
+        
+        {/* Logo Container: Adjust width (w-64) and height (h-24) to fit your image ratios */}
+        <div className="relative w-64 h-24 mb-6">
+          <Image
+            src="/logo.png" // Refers directly to public/logo.png
+            alt="Rhemaka Logo"
+            fill
+            priority // Preloads the logo immediately for better user experience
+            className="object-contain" // Preserves your image's aspect ratio without stretching
+          />
+        </div>
+        
         <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-          Where curious minds connect, compete, and collaborate.
+          Nexus for Tech Passion.
         </p>
         <div className="flex justify-center gap-4">
           <Link 

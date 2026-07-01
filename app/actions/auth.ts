@@ -6,10 +6,21 @@ import bcrypt from 'bcryptjs';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 
-// Action 1: Create a new user profile on Supabase
+// Action 1: Create a new user profile on Supabase (With secure password validation)
 export async function registerUser(username: string, email: string, password: string) {
   if (!username || !email || !password) {
     return { error: "All fields are required." };
+  }
+
+  // Server-side security checks (parallels our real-time frontend indicators)
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[^A-Za-z0-9]/.test(password); // Any non-alphanumeric character
+
+  if (!hasMinLength || !hasUppercase || !hasLowercase || !hasNumber || !hasSpecialChar) {
+    return { error: "Password does not meet the minimum security requirements." };
   }
 
   try {
@@ -44,16 +55,15 @@ export async function registerUser(username: string, email: string, password: st
   }
 }
 
-// Action 2: Trigger NextAuth Credentials Sign-In (Using native Server-Side Redirects)
+// Action 2: Trigger NextAuth Credentials Sign-In (Leave exactly as is)
 export async function loginUser(email: string, password: string) {
   try {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/forum", // Next.js will handle cookie setting and redirect safely on the server!
+      redirectTo: "/forum",
     });
   } catch (error) {
-    // NextAuth throws AuthError if credentials mismatch
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
@@ -62,9 +72,6 @@ export async function loginUser(email: string, password: string) {
           return { error: "Something went wrong during login." };
       }
     }
-    
-    // IMPORTANT: In NextAuth v5, successful login internally throws a Redirect error.
-    // We MUST re-throw the error so that Next.js can intercept it and perform the redirect!
     throw error;
   }
 }

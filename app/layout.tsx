@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Rhemaka",
-  description: "Where curious minds connect, compete, and collaborate.",
+  description: "Nexus for Tech  Passion.",
 };
 
 export default function RootLayout({

@@ -22,20 +22,20 @@ io.on("connection", (socket) => {
     console.log(`👤 User with ID ${userId} joined their chat channel.`);
   });
 
-  socket.on("send_message", (data) => {
-    const { recipientId, senderId, senderName, content } = data;
-    console.log(`✉️ Message from ${senderName} to User ${recipientId}: "${content}"`);
+ socket.on("send_message", (data) => {
+    const { recipientId, senderId, senderName, content, replyTo } = data;
+    console.log(`✉️ Message from ${senderName} (replyTo: ${replyTo ? 'Yes' : 'No'}): "${content}"`);
 
     const formattedMessage = {
       senderId,
       senderName,
       content,
+      replyTo, // Relays { id, content, sender: { username } } metadata to the clients
       createdAt: new Date().toISOString()
     };
 
     io.to(recipientId).emit("receive_message", formattedMessage);
     io.to(senderId).emit("receive_message", formattedMessage);
-    console.log(`➡️ Message relayed successfully.`);
   });
 
 
